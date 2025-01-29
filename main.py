@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import pandas as pd
 import pickle
 import os
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
@@ -10,6 +11,11 @@ app = FastAPI()
 @app.get("/")
 def read_root():
     return {"message": "API is working!"}
+
+
+@app.head("/")
+def head_root():
+    return JSONResponse(status_code=200)
 
 # Load processor and model pickle files
 try:
