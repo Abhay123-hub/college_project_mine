@@ -15,7 +15,7 @@ def read_root():
 
 @app.head("/")
 def head_root():
-    return JSONResponse(status_code=200)
+    return JSONResponse(status_code=200,content = {})
 
 # Load processor and model pickle files
 try:
