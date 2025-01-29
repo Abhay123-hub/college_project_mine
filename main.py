@@ -2,15 +2,27 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import pandas as pd
 import pickle
+import os
 
 app = FastAPI()
 
+# Add a simple root route for testing
+@app.get("/")
+def read_root():
+    return {"message": "API is working!"}
+
 # Load processor and model pickle files
 try:
+    if not os.path.exists("artifacts/processor.pkl") or not os.path.exists("artifacts/model.pkl"):
+        raise FileNotFoundError("Processor or model pickle file is missing.")
+    
     with open("artifacts/processor.pkl", "rb") as processor_file:
         processor = pickle.load(processor_file)
     with open("artifacts/model.pkl", "rb") as model_file:
         model = pickle.load(model_file)
+
+except FileNotFoundError as e:
+    raise HTTPException(status_code=404, detail=str(e))
 except Exception as e:
     raise Exception(f"Error loading pickle files: {str(e)}")
 
@@ -45,5 +57,7 @@ async def predict(input_data: InputData):
         # Step 4: Return the predictions as JSON
         return {"predictions": predictions.tolist()}
 
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=f"Value Error: {str(ve)}")
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
